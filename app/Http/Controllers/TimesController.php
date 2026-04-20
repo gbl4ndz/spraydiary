@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Auth;
@@ -153,7 +152,7 @@ class TimesController extends Controller
 
     public function autoliquidTotal(Request $request)
     {
-        $term = Str::lower(Input::get('term'));
+        $term = Str::lower($request->input('term', ''));
         $range1 = range(1,15);
         $range2 = range(50,2000,50);
         $data = array_merge($range1,$range2);

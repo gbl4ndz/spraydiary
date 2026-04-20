@@ -3,14 +3,10 @@
 namespace App\Http\Controllers\Traits;
 
 use Illuminate\Http\Request;
-use Intervention\Image\Facades\Image;
+use Intervention\Image\Laravel\Facades\Image;
 
 trait FileUploadTrait
 {
-
-    /**
-     * File upload trait used in controllers to upload files
-     */
     public function saveFiles(Request $request)
     {
         if (! file_exists(public_path('uploads'))) {
@@ -23,27 +19,26 @@ trait FileUploadTrait
         foreach ($request->all() as $key => $value) {
             if ($request->hasFile($key)) {
                 if ($request->has($key . '_max_width') && $request->has($key . '_max_height')) {
-                    // Check file width
-                    $filename = time() . '-' . $request->file($key)->getClientOriginalName();
-                    $file     = $request->file($key);
-                    $image    = Image::make($file);
+                    $filename  = time() . '-' . $request->file($key)->getClientOriginalName();
+                    $file      = $request->file($key);
+                    $image     = Image::read($file);
+                    $maxWidth  = $request->{$key . '_max_width'};
+                    $maxHeight = $request->{$key . '_max_height'};
+
                     if (! file_exists(public_path('uploads/thumb'))) {
                         mkdir(public_path('uploads/thumb'), 0777, true);
                     }
-                    Image::make($file)->resize(50, 50)->save(public_path('uploads/thumb') . '/' . $filename);
-                    $width  = $image->width();
-                    $height = $image->height();
-                    if ($width > $request->{$key . '_max_width'} && $height > $request->{$key . '_max_height'}) {
-                        $image->resize($request->{$key . '_max_width'}, $request->{$key . '_max_height'});
-                    } elseif ($width > $request->{$key . '_max_width'}) {
-                        $image->resize($request->{$key . '_max_width'}, null, function ($constraint) {
-                            $constraint->aspectRatio();
-                        });
-                    } elseif ($height > $request->{$key . '_max_width'}) {
-                        $image->resize(null, $request->{$key . '_max_height'}, function ($constraint) {
-                            $constraint->aspectRatio();
-                        });
+
+                    Image::read($file)->scaleDown(50, 50)->save(public_path('uploads/thumb') . '/' . $filename);
+
+                    if ($image->width() > $maxWidth && $image->height() > $maxHeight) {
+                        $image->scaleDown($maxWidth, $maxHeight);
+                    } elseif ($image->width() > $maxWidth) {
+                        $image->scaleDown(width: $maxWidth);
+                    } elseif ($image->height() > $maxHeight) {
+                        $image->scaleDown(height: $maxHeight);
                     }
+
                     $image->save(public_path('uploads') . '/' . $filename);
                     $finalRequest = new Request(array_merge($finalRequest->all(), [$key => $filename]));
                 } else {
