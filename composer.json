@@ -5,7 +5,7 @@
     "license": "MIT",
     "type": "project",
     "require": {
-        "php": "^8.5",
+        "php": "^8.2",
         "doctrine/dbal": "^3.6",
         "filament/filament": "^3.2",
         "intervention/image": "^3.3",
