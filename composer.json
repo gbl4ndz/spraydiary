@@ -6,6 +6,8 @@
     "type": "project",
     "require": {
         "php": "^8.2",
+        "ext-intl": "*",
+        "ext-zip": "*",
         "doctrine/dbal": "^3.6",
         "filament/filament": "^3.2",
         "intervention/image": "^3.3",
