@@ -16,6 +16,7 @@ class BlockResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
     protected static ?string $navigationGroup = 'Greenhouse';
     protected static ?string $navigationLabel = 'Blocks';
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {

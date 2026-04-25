@@ -1,16 +1,11 @@
 <x-filament-widgets::widget>
     @php $active = $this->getActiveTime(); @endphp
 
-    <x-filament::section>
-        @if($active)
-            <x-slot name="heading">
-                <span class="flex items-center gap-2">
-                    <span class="inline-block h-2.5 w-2.5 animate-pulse rounded-full bg-green-500"></span>
-                    Active Spray Session
-                </span>
-            </x-slot>
+    @if($active)
+        @php $startTs = $this->getStartTimestamp(); @endphp
 
-            @php $startTs = $this->getStartTimestamp(); @endphp
+        <div class="relative overflow-hidden rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-white dark:border-emerald-800/40 dark:from-emerald-950/40 dark:via-gray-900 dark:to-gray-900">
+            <div class="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-emerald-100/60 dark:bg-emerald-900/20"></div>
 
             <div
                 x-data="{
@@ -26,61 +21,69 @@
                     }
                 }"
                 x-init="tick(); setInterval(() => tick(), 1000)"
-                class="flex flex-col gap-6 md:flex-row md:items-center"
+                class="relative p-6"
             >
-                <div class="text-center md:text-left">
-                    <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-gray-400">Elapsed</p>
-                    <span
-                        x-text="elapsed"
-                        class="font-mono text-4xl font-bold tabular-nums text-green-600 dark:text-green-400"
-                    ></span>
-                </div>
-
-                <div class="grid flex-1 grid-cols-2 gap-4 text-sm md:grid-cols-4">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">Task</p>
-                        <p class="font-medium">{{ $active->task->description ?? '—' }}</p>
+                {{-- Header row --}}
+                <div class="mb-5 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="relative flex h-2.5 w-2.5">
+                            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                            <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+                        </span>
+                        <span class="text-xs font-semibold uppercase tracking-widest text-emerald-700 dark:text-emerald-400">Session Active</span>
                     </div>
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">Block</p>
-                        <p class="font-medium">{{ $active->block->block_name ?? '—' }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">Chemical</p>
-                        <p class="font-medium">{{ $active->chemical->trade_name ?? '—' }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400">Started</p>
-                        <p class="font-medium">{{ $active->start_time }}</p>
-                    </div>
-                </div>
-
-                <div class="shrink-0">
                     <x-filament::button
                         tag="a"
                         :href="filament()->getUrl() . '/timekeeping'"
-                        color="warning"
-                        size="sm"
+                        color="gray"
+                        size="xs"
                         icon="heroicon-m-arrow-top-right-on-square"
                     >
-                        Go to Timer
+                        Open Timer
                     </x-filament::button>
                 </div>
-            </div>
-        @else
-            <x-slot name="heading">
-                <span class="flex items-center gap-2">
-                    <span class="inline-block h-2.5 w-2.5 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-                    No Active Session
-                </span>
-            </x-slot>
 
-            <p class="text-sm text-gray-500 dark:text-gray-400">
-                No spray session is currently running.
-                <x-filament::link :href="filament()->getUrl() . '/timekeeping'">
-                    Start one now
-                </x-filament::link>
-            </p>
-        @endif
-    </x-filament::section>
+                {{-- Timer --}}
+                <div class="mb-5">
+                    <p class="mb-1 text-xs font-medium uppercase tracking-widest text-slate-400">Elapsed Time</p>
+                    <span
+                        x-text="elapsed"
+                        class="font-mono text-4xl font-bold tabular-nums tracking-tight text-slate-800 dark:text-slate-100"
+                    ></span>
+                </div>
+
+                {{-- Session details --}}
+                <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    @foreach([
+                        ['Task',     $active->task->description ?? '—'],
+                        ['Block',    $active->block->block_name ?? '—'],
+                        ['Chemical', $active->chemical->trade_name ?? '—'],
+                        ['Started',  $active->start_time],
+                    ] as [$label, $value])
+                        <div>
+                            <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ $label }}</p>
+                            <p class="mt-0.5 truncate text-sm font-medium text-slate-700 dark:text-slate-300">{{ $value }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+    @else
+        <div class="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/80 p-6 dark:border-slate-700/60 dark:bg-slate-800/40">
+            <div class="flex items-center gap-2.5">
+                <span class="inline-flex h-2.5 w-2.5 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                <p class="text-sm font-medium text-slate-500 dark:text-slate-400">No active spray session</p>
+            </div>
+            <x-filament::button
+                tag="a"
+                :href="filament()->getUrl() . '/timekeeping'"
+                color="success"
+                size="sm"
+                icon="heroicon-m-play-circle"
+            >
+                Start Session
+            </x-filament::button>
+        </div>
+    @endif
 </x-filament-widgets::widget>

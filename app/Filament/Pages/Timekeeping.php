@@ -9,12 +9,16 @@ use App\Task;
 use App\Time;
 use Carbon\Carbon;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Illuminate\Support\HtmlString;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
@@ -82,7 +86,42 @@ class Timekeeping extends Page implements HasForms
                     ->label('Chemical')
                     ->options(fn () => Chemical::pluck('trade_name', 'id'))
                     ->searchable()
-                    ->required(),
+                    ->required()
+                    ->live(),
+                Placeholder::make('chemical_details')
+                    ->label('')
+                    ->content(function (Get $get): HtmlString {
+                        $id = $get('chemical_id');
+                        if (! $id) {
+                            return new HtmlString('');
+                        }
+
+                        $c = Chemical::find($id);
+                        if (! $c) {
+                            return new HtmlString('');
+                        }
+
+                        $rows = collect([
+                            'Components'          => $c->components,
+                            'Application Rate'    => $c->rates,
+                            'Withholding Period'  => $c->withhold_period,
+                            'Target Pest/Disease' => $c->pest_disease,
+                        ])
+                            ->filter()
+                            ->map(fn ($val, $label) =>
+                                "<div><span class=\"font-semibold text-gray-600 dark:text-gray-400\">{$label}:</span> {$val}</div>"
+                            )
+                            ->join('');
+
+                        if (! $rows) {
+                            return new HtmlString('');
+                        }
+
+                        return new HtmlString(
+                            "<div class=\"rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-gray-700 space-y-1 dark:border-blue-800 dark:bg-blue-950 dark:text-gray-300\">{$rows}</div>"
+                        );
+                    })
+                    ->hidden(fn (Get $get): bool => ! $get('chemical_id')),
                 TextInput::make('tank_capacity')
                     ->label('Tank Capacity (L)')
                     ->numeric()
@@ -121,6 +160,20 @@ class Timekeeping extends Page implements HasForms
         $this->form->fill();
 
         Notification::make()->title('Timer started')->success()->send();
+    }
+
+    public function stopTimerAction(): Action
+    {
+        return Action::make('stopTimer')
+            ->label('Stop Timer')
+            ->color('danger')
+            ->icon('heroicon-m-stop-circle')
+            ->size('lg')
+            ->requiresConfirmation()
+            ->modalHeading('Stop Session')
+            ->modalDescription('Are you sure you want to stop the current spray session?')
+            ->modalSubmitActionLabel('Yes, stop timer')
+            ->action(fn () => $this->stopTimer());
     }
 
     public function stopTimer(): void

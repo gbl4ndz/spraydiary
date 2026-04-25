@@ -16,6 +16,7 @@ class ShedResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-home';
     protected static ?string $navigationGroup = 'Greenhouse';
     protected static ?string $navigationLabel = 'Sheds';
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {

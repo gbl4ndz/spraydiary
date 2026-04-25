@@ -31,13 +31,13 @@
                     <span class="title">@lang('global.app_tasks')</span>
                 </a>
             </li>
-            <li class="{{ $request->segment(1) == 'tasks' ? 'active' : '' }}">
+            <li class="{{ $request->segment(2) == 'chemicals' ? 'active' : '' }}">
                 <a href="{{ route('admin.chemicals.index') }}">
                     <i class="fa fa-flask"></i>
                     <span class="title">@lang('global.app_chemicals')</span>
                 </a>
             </li>
-             <li class="{{ $request->segment(1) == 'tasks' ? 'active' : '' }}">
+             <li class="{{ $request->segment(2) == 'greenhouse' ? 'active' : '' }}">
                 <a href="{{ route('admin.greenhouse.index') }}">
                     <i class="fa fa-th-large"></i>
                     <span class="title">@lang('global.greenhouse')</span>
